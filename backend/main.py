@@ -1,8 +1,10 @@
 from flask import Flask
 from flask_restx import Resource, Api, reqparse
+from flask_cors import CORS, cross_origin
 from download import get_streams, find_stream
 
 app = Flask(__name__)
+cors = CORS(app)
 api = Api(app)
 
 song_parser = reqparse.RequestParser()

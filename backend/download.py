@@ -25,11 +25,12 @@ def get_streams(url):
             config.base_headers,
         )
     )
+    print(json.load(response))
     return json.load(response)["streamingData"]["adaptiveFormats"]
 
 
 def find_stream(streams, prioritise_bitrate=True, include_video=False):
-    filtered_streams = filter(lambda s: s["mimeType"].split("/")[0] == "audio", streams)
+    filtered_streams = filter(lambda s: s["mimeType"] == "audio/mp3", streams)
     if prioritise_bitrate:
         return sorted(filtered_streams, key=lambda s: s["bitrate"], reverse=True)[0]
     else:

@@ -1,31 +1,41 @@
-from pytubefix import YouTube, streams
 import config
 import json
 from download import *
 from urllib import request
 
-# video = YouTube('https://youtu.be/_UlDlkQcHTM', lambda a, b, c: print(a, b, c), lambda a, b, c: print('completed callback'))
 
-def progress_func(a, b, c):
-    pass
+# import yt_dlp
 
+# URLS = ['https://www.youtube.com/watch?v=BaW_jenozKc']
 
-def complete_func(a, b, c):
-    pass
+# ydl_opts = {
+#     'format': 'm4a/bestaudio/best',
+#     # ℹ️ See help(yt_dlp.postprocessor) for a list of available Postprocessors and their arguments
+#     'postprocessors': [{  # Extract audio using ffmpeg
+#         'key': 'FFmpegExtractAudio',
+#         'preferredcodec': 'm4a',
+#     }]
+# }
 
-yt = YouTube(
-        'https://youtu.be/_UlDlkQcHTM',
-        on_progress_callback=progress_func,
-        on_complete_callback=complete_func,
-        proxies=None,
-        use_oauth=False,
-        allow_oauth_cache=True
-    )
-print(yt.streams)
+# with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+#     error_code = ydl.download(URLS)
+
+# import youtube_dl
+
+# ydl_opts = {}
+# with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+#     ydl.download(['https://www.youtube.com/watch?v=BaW_jenozKc'])
+
+# from pytubefix import YouTube
+
+# yt = YouTube("https://youtu.be/_UlDlkQcHTM", use_po_token=False, client="WEB")
+# ys = yt.streams.get_highest_resolution()
+# ys.download()
 
 
 streams = get_streams("https://youtu.be/_UlDlkQcHTM")
-request.urlretrieve
+stream = find_stream(streams)
+# sign_url("https://youtu.be/_UlDlkQcHTM", stream)
+url = stream["url"]
 
-
-print(find_stream(streams))
+print(stream)

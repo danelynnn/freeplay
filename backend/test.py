@@ -33,7 +33,8 @@ from urllib import request
 # ys.download()
 
 
-streams = get_streams("https://youtu.be/_UlDlkQcHTM")
+video_id = extract_video_id("https://youtu.be/_UlDlkQcHTM")
+streams = get_streams(video_id)
 stream = find_stream(streams)
 # sign_url("https://youtu.be/_UlDlkQcHTM", stream)
 url = stream["url"]

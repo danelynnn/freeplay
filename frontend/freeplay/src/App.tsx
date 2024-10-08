@@ -1,23 +1,24 @@
-import logo from './logo.svg';
-import './App.scss';
-import { useState } from 'react';
+import logo from "./logo.svg";
+import "./App.scss";
+import { useState } from "react";
+import Body from "./Body/Body";
 
 function App() {
-  const [url, setUrl] = useState('https://youtu.be/ZPqZyIKtW0Y')
+  const [url, setUrl] = useState("https://youtu.be/ZPqZyIKtW0Y");
 
   function onUrlChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setUrl(e.target.value)
+    setUrl(e.target.value);
   }
 
   function loadFile() {
-    console.log(url)
-    let params = new URLSearchParams()
-    params.append('song_url', url)
-    fetch('http://127.0.0.1:5000/load_song?' + params.toString())
-      .then(response => response.json())
-      .then(json => {
-        console.log(json)
-      })
+    console.log(url);
+    let params = new URLSearchParams();
+    params.append("song_url", url);
+    fetch("http://127.0.0.1:5000/load_song?" + params.toString())
+      .then((response) => response.json())
+      .then((json) => {
+        console.log(json);
+      });
   }
 
   return (
@@ -36,11 +37,16 @@ function App() {
           Learn React
         </a> */}
 
-        <input type='text' placeholder='put url here' onChange={onUrlChange}></input>
+        <input
+          type="text"
+          placeholder="put url here"
+          onChange={onUrlChange}
+        ></input>
         <button onClick={loadFile}>hi do the thing</button>
 
         {url}
       </header>
+      <Body></Body>
     </div>
   );
 }

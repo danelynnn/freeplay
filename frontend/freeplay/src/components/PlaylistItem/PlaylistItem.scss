@@ -1,0 +1,16 @@
+@import "App";
+
+.playlistItem {
+  display: flex;
+  gap: 20px;
+
+  &:nth-child(even) {
+    background-color: $darker-color;
+  }
+
+  &:hover {
+    background-color: $highlight;
+  }
+
+  margin-bottom: 10px;
+}

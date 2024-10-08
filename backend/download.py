@@ -21,8 +21,7 @@ def request(url, data, headers) -> str:
     return response.read().decode("utf-8")
 
 
-def get_streams(url):
-    video_id = extract_video_id(url)
+def get_streams(video_id):
     data = json.dumps(
         {
             "context": config.ios_context,

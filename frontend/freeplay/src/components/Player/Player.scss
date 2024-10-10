@@ -1,5 +1,11 @@
 @import "App";
 
+.progressbar {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
 .progress {
   border-radius: 3px;
   width: 50px;

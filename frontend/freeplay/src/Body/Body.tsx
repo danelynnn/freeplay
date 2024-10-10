@@ -3,9 +3,16 @@ import "./Body.scss";
 import { objToQueryString } from "utils";
 import PlaylistItem from "components/PlaylistItem/PlaylistItem";
 import Player from "components/Player/Player";
+import { Outlet, useNavigate } from "react-router-dom";
+
+// praise https://stackoverflow.com/a/70446743/6794873
+function withNavigate(Component: any) {
+  return (props: any) => <Component {...props} navigate={useNavigate()} />;
+}
 
 class Body extends React.Component {
-  state = { playlists: [] };
+  state = { playlists: [], nowPlaying: "" };
+  props = { navigate: (dest: any) => {} };
 
   componentDidMount(): void {
     const channelId = "UChZJRASiSGfBba91VvkdbEA";
@@ -16,7 +23,7 @@ class Body extends React.Component {
       key: "AIzaSyAMCp_2vGgaVHlvM4f_544qwDOxIctjmKg",
     };
     fetch(
-      `https://www.googleapis.com/youtube/v3/playlists${objToQueryString(
+      `https://www.googleapis.com/youtube/v3/playlists?${objToQueryString(
         query
       )}`
     )
@@ -36,8 +43,10 @@ class Body extends React.Component {
   }
 
   handleSelect(e: any) {
-    console.log(e);
+    this.props.navigate(e);
   }
+
+  ended() {}
 
   render() {
     return (
@@ -47,17 +56,16 @@ class Body extends React.Component {
           <div className="striped"></div>
           {this.state.playlists.map((p: any) => (
             <PlaylistItem
+              key={p.id}
               data={p}
               onClick={() => this.handleSelect(p.id)}
             ></PlaylistItem>
           ))}
         </div>
-        <div style={{ flex: 2 }}>
-          <Player></Player>
-        </div>
+        <Outlet />
       </div>
     );
   }
 }
 
-export default Body;
+export default withNavigate(Body);

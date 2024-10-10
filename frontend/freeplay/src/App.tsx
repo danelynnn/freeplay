@@ -2,6 +2,7 @@ import logo from "./logo.svg";
 import "./App.scss";
 import { useState } from "react";
 import Body from "./Body/Body";
+import { objToQueryString } from "utils";
 
 function App() {
   const [url, setUrl] = useState("https://youtu.be/ZPqZyIKtW0Y");
@@ -11,10 +12,8 @@ function App() {
   }
 
   function loadFile() {
-    console.log(url);
-    let params = new URLSearchParams();
-    params.append("song_url", url);
-    fetch("http://127.0.0.1:5000/load_song?" + params.toString())
+    const params = { song_url: url };
+    fetch(`http://127.0.0.1:5000/load_song?${objToQueryString(params)}`)
       .then((response) => response.json())
       .then((json) => {
         console.log(json);

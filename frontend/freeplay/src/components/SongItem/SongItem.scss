@@ -1,0 +1,18 @@
+@import "App";
+
+.songItem {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+
+  &:hover {
+    background-color: $highlight;
+  }
+
+  &.selected {
+    background-color: $darker-color;
+  }
+
+  padding: 20px;
+}

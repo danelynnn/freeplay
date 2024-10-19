@@ -1,4 +1,3 @@
-import logo from "./logo.svg";
 import "./App.scss";
 import { useState } from "react";
 import Body from "./Body/Body";
@@ -36,16 +35,12 @@ function App() {
           Learn React
         </a> */}
 
-        <input
-          type="text"
-          placeholder="put url here"
-          onChange={onUrlChange}
-        ></input>
+        <input type="text" placeholder="put url here" onChange={onUrlChange} />
         <button onClick={loadFile}>hi do the thing</button>
 
         {url}
       </header>
-      <Body></Body>
+      <Body />
     </div>
   );
 }

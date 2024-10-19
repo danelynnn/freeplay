@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import "./Body.scss";
 import { objToQueryString } from "utils";
 import PlaylistItem from "components/PlaylistItem/PlaylistItem";
-import Player from "components/Player/Player";
 import { Outlet, useNavigate } from "react-router-dom";
 
 // praise https://stackoverflow.com/a/70446743/6794873
@@ -53,14 +52,15 @@ class Body extends React.Component {
       <div className="App-main">
         <div style={{ flex: 1 }} className="master">
           <h1>your youtube lists</h1>
-          <div className="striped"></div>
-          {this.state.playlists.map((p: any) => (
-            <PlaylistItem
-              key={p.id}
-              data={p}
-              onClick={() => this.handleSelect(p.id)}
-            ></PlaylistItem>
-          ))}
+          <div className="striped">
+            {this.state.playlists.map((p: any) => (
+              <PlaylistItem
+                key={p.id}
+                data={p}
+                onClick={() => this.handleSelect(p.id)}
+              />
+            ))}
+          </div>
         </div>
         <Outlet />
       </div>

@@ -1,5 +1,3 @@
-import { json } from "stream/consumers";
-
 function objToQueryString(obj: object) {
   let params = new URLSearchParams();
 
@@ -27,4 +25,17 @@ async function fetchp(url: string) {
   return data;
 }
 
-export { objToQueryString, fetchp };
+function formatTime(seconds: number) {
+  var ms = Math.floor((seconds % 1) * 1000);
+  seconds = Math.floor(seconds);
+  var hours = Math.floor(seconds / 3600);
+  var minutes = Math.floor((seconds - hours * 3600) / 60);
+
+  return `${hours.toString().padStart(2, "0")}:${minutes
+    .toString()
+    .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}.${ms
+    .toString()
+    .padStart(4, "0")}`;
+}
+
+export { objToQueryString, fetchp, formatTime };

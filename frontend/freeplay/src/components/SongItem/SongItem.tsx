@@ -11,7 +11,7 @@ function SongItem(props: {
       onClick={props.onClick}
       className={"songItem " + (props.selected ? "selected" : "")}
     >
-      <img src={props.data}></img>
+      <img src={props.data} alt="meaningless text" />
       {props.data}
     </div>
   );

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import Player from "components/Player/Player";
 import { useParams } from "react-router-dom";
 import { fetchp, objToQueryString } from "utils";
@@ -58,8 +58,9 @@ class Sidebar extends React.Component {
       console.log(data);
       const songList = data.map((v) => v.contentDetails.videoId);
       this.shuffle(songList, "");
-      this.setState({ songList: songList });
+
       this.state.nowPlaying = 0;
+      this.setState({ songList: songList });
     });
   }
 
@@ -70,11 +71,11 @@ class Sidebar extends React.Component {
   }
 
   componentDidUpdate(prevProps: any, prevState: any): void {
-    if (this.props.params.playlistId != prevProps.params.playlistId) {
+    if (this.props.params.playlistId !== prevProps.params.playlistId) {
       this.loadPlaylist(this.props.params.playlistId);
     } else if (
-      this.state.songList != prevState.songList ||
-      this.state.nowPlaying != prevState.nowPlaying
+      this.state.songList !== prevState.songList ||
+      this.state.nowPlaying !== prevState.nowPlaying
     ) {
       this.loadSong(this.state.songList[this.state.nowPlaying]);
 
@@ -124,7 +125,7 @@ class Sidebar extends React.Component {
               <Player
                 src={this.state.currentSongInfo?.url}
                 ended={this.ended}
-              ></Player>
+              />
               <p>{this.state.currentSongInfo.title}</p>
               <p>{this.state.currentSongInfo.author}</p>
             </div>
@@ -138,7 +139,7 @@ class Sidebar extends React.Component {
                 onClick={() => {
                   this.setState({ nowPlaying: i });
                 }}
-                selected={i == this.state.nowPlaying}
+                selected={i === this.state.nowPlaying}
               />
             ))}
           </div>

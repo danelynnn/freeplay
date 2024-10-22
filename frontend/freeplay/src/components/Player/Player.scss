@@ -10,7 +10,7 @@
   border-radius: 3px;
   width: 50px;
   height: 100%;
-  background-color: green;
+  background-color: darkred;
 }
 
 .capacity {
@@ -21,4 +21,15 @@
 
 .controls {
   padding: 10px;
+  * {
+    vertical-align: middle;
+  }
+}
+
+.play {
+  display: inline-block;
+}
+
+.hover:hover {
+  color: gray;
 }

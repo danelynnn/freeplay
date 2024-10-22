@@ -19,6 +19,7 @@ class Player extends React.Component<any, any> {
   }
 
   componentDidMount(): void {
+    console.log("player mounted", this.props.src);
     this.state.audioElement.addEventListener("timeupdate", (e) => {
       this.setState({ progress: this.state.audioElement.currentTime });
       this.setState({ duration: this.state.audioElement.duration });
@@ -31,7 +32,7 @@ class Player extends React.Component<any, any> {
 
   componentDidUpdate(prevProps: Readonly<any>): void {
     if (this.props.src !== prevProps.src) {
-      console.log("playing new song");
+      console.log("playing", this.props.src);
       this.state.audioElement.src = this.props.src;
       try {
         this.state.audioElement.play();

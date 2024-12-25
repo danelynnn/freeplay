@@ -79,7 +79,7 @@ class Player extends React.Component<any, any> {
 
   render(): React.ReactNode {
     return (
-      <div>
+      <div className="player">
         <div className="progressbar">
           <div style={{ flex: "0 0 128px" }}>
             {formatTime(this.state.progress)}
@@ -94,7 +94,7 @@ class Player extends React.Component<any, any> {
               }}
             />
           </div>
-          <div style={{ flex: "0 0 128px" }}>
+          <div style={{ flex: "0 0 128px", textAlign: "right" }}>
             {formatTime(this.state.duration)}
           </div>
         </div>

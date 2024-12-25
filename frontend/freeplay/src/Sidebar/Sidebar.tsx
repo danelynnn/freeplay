@@ -53,7 +53,7 @@ class Sidebar extends React.Component {
             part: "contentDetails",
             playlistId: playlistId,
             maxResults: 50,
-            key: "AIzaSyAMCp_2vGgaVHlvM4f_544qwDOxIctjmKg",
+            key: "AIzaSyBpC7AWMX0Hm2HKvo4Gw7psmoGKPu72gxg",
           }
         )}`
       ).then((data) => {
@@ -88,7 +88,7 @@ class Sidebar extends React.Component {
         `https://www.googleapis.com/youtube/v3/videos?${objToQueryString({
           part: "snippet",
           id: newSong,
-          key: "AIzaSyAMCp_2vGgaVHlvM4f_544qwDOxIctjmKg",
+          key: "AIzaSyBpC7AWMX0Hm2HKvo4Gw7psmoGKPu72gxg",
         })}`
       )
         .then((response) => response.json())
@@ -131,7 +131,7 @@ class Sidebar extends React.Component {
   render() {
     return (
       <div style={{ flex: 2 }} className="detail">
-        <div style={{ flex: 3 }}>
+        <div style={{ flex: 3, padding: 10 }}>
           <div>
             <Player src={this.state.currentSongInfo?.url} ended={this.ended} />
             <p>{this.state.currentSongInfo.title}</p>

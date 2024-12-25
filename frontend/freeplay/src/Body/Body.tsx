@@ -19,7 +19,7 @@ class Body extends React.Component {
       part: "contentDetails,snippet",
       channelId: channelId,
       maxResults: 50,
-      key: "AIzaSyAMCp_2vGgaVHlvM4f_544qwDOxIctjmKg",
+      key: "AIzaSyBpC7AWMX0Hm2HKvo4Gw7psmoGKPu72gxg",
     };
     fetch(
       `https://www.googleapis.com/youtube/v3/playlists?${objToQueryString(

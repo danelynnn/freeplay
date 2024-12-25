@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { fetchp, objToQueryString } from "utils";
 import "./Sidebar.scss";
 import SongItem from "components/SongItem/SongItem";
+import ContextMenu from "components/PlaylistItem/ContextMenu/ContextMenu";
 
 // praise https://stackoverflow.com/a/70446743/6794873
 function withParams(Component: any) {
@@ -137,6 +138,7 @@ class Sidebar extends React.Component {
             <p>{this.state.currentSongInfo.title}</p>
             <p>{this.state.currentSongInfo.author}</p>
           </div>
+          <ContextMenu data={null} onClick={null} />
         </div>
         <div style={{ flex: 1, overflowY: "scroll" }}>
           <div>

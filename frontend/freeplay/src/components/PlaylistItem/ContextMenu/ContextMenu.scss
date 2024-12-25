@@ -1,0 +1,29 @@
+@import "App";
+
+.contextMenu {
+  display: block;
+  border-radius: 10px;
+  background-color: $darker-color;
+  width: 200px;
+}
+
+.header {
+  padding: 15px;
+  border-bottom: 1px solid darkslategray;
+}
+
+.menu {
+  padding: 0px 10px 0px 10px;
+}
+
+.menuItem {
+  padding: 10px;
+
+  &:first-child {
+    border: none;
+  }
+
+  &:not(:first-child) {
+    border-top: 1px solid gray;
+  }
+}

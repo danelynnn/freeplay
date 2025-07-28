@@ -1,13 +1,16 @@
 from flask import Flask, request
 from flask_restx import Resource, Api, reqparse
 from flask_cors import CORS, cross_origin
-from download import get_streams, find_stream
-from pymongo import MongoClient
 import bcrypt
+from pymongo import MongoClient
+from yt_dlp import YoutubeDL
 
 app = Flask(__name__)
 cors = CORS(app)
 api = Api(app)
+
+ydl_opts = {"get-url": True, "format": "m4a/bestaudio/best"}
+ydl = YoutubeDL(ydl_opts)
 
 client = MongoClient("localhost", 27017)
 db = client.freeplay
@@ -25,9 +28,9 @@ class Song(Resource):
         args = song_parser.parse_args()
 
         try:
-            streams = get_streams(args.get("video_id"))
-            value = find_stream(streams)
-            return {"success": True, "response": value}
+            dic = ydl.extract_info(args.get("video_id"), download=False)
+            audio = [fmt for fmt in dic["formats"] if fmt["ext"] == "webm"][0]["url"]
+            return {"success": True, "response": audio}
         except Exception as e:
             return {"success": False, "response": str(e)}
 

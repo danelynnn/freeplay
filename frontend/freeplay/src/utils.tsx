@@ -38,4 +38,17 @@ function formatTime(seconds: number) {
     .padStart(4, "0")}`;
 }
 
-export { objToQueryString, fetchp, formatTime };
+function shuffle(list: any[], mode: string) {
+  switch (mode) {
+    default: // THE KNUTH SHUFFL: https://stackoverflow.com/a/2450976/6794873
+      let i = list.length;
+      while (i > 0) {
+        let randomIndex = Math.floor(Math.random() * i);
+        i--;
+
+        [list[i], list[randomIndex]] = [list[randomIndex], list[i]];
+      }
+  }
+}
+
+export { objToQueryString, fetchp, formatTime, shuffle };

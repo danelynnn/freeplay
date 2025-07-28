@@ -30,6 +30,15 @@ $tertiary-color: #6e1a10;
   padding: 20px 0px 20px 0px;
 }
 
+.App-main {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: row;
+
+  padding-top: 20px;
+  height: 0px;
+}
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;

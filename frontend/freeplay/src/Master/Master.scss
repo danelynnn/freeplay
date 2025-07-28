@@ -1,0 +1,8 @@
+@import "App";
+
+.master {
+  padding: 20px;
+  background-color: $darker-color;
+  overflow-y: scroll;
+  height: 100%;
+}

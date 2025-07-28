@@ -1,122 +1,102 @@
-import React from "react";
 import "./Player.scss";
+
+import { useCallback, useEffect, useState } from "react";
+import React from "react";
+
 import { formatTime } from "utils";
 import { ReactComponent as Play } from "img/play.svg";
 import { ReactComponent as Pause } from "img/pause.svg";
 
-class Player extends React.Component<any, any> {
-  audioElement: any;
-  audioCtx: any;
+function logScale(amount: number) {
+  return (Math.pow(1.03, amount) - 1) * (100 / (Math.pow(1.03, 100) - 1));
+}
 
-  state = {
-    progress: -1,
-    duration: -1,
-    paused: false,
-    volume: 100,
-    length: 0,
-  };
-  capacityRef: any;
+const audioElement = new Audio();
 
-  constructor(props: any) {
-    super(props);
-    this.audioElement = new Audio();
-    this.capacityRef = React.createRef();
-    this.updateProgress = this.updateProgress.bind(this);
-    this.togglePause = this.togglePause.bind(this);
-    this.updateVolume = this.updateVolume.bind(this);
-  }
+function Player(props: { src: string; ended: () => void }) {
+  const audioCtx = null;
 
-  componentDidMount(): void {
-    console.log("player mounted", this.props.src);
-    this.audioElement.addEventListener("ended", this.props.ended);
+  const [progress, setProgress] = useState(-1);
+  const [duration, setDuration] = useState(-1);
+  const [paused, setPaused] = useState(false);
+  const [length, setLength] = useState(0);
 
-    const capacityLength = getComputedStyle(this.capacityRef.current).width;
-    this.setState({ length: parseInt(capacityLength) });
-  }
+  const capacityRef = React.createRef<any>();
 
-  updateProgress() {
-    if (!this.audioElement.paused) {
-      this.state.duration = this.audioElement.duration;
-      this.setState({ progress: this.audioElement.currentTime });
-      requestAnimationFrame(this.updateProgress);
+  // send audio element's ended flag up the chain
+  audioElement.addEventListener("ended", props.ended);
+
+  const updateProgress = useCallback(() => {
+    if (!audioElement.paused) {
+      if (duration == -1) setDuration(audioElement.duration);
+      setProgress(audioElement.currentTime);
+      requestAnimationFrame(updateProgress);
     }
-  }
+  }, []);
 
-  componentDidUpdate(prevProps: Readonly<any>): void {
-    if (this.props.src !== prevProps.src) {
-      console.log("playing", this.props.src);
-      this.audioElement.src = this.props.src;
-
-      try {
-        this.audioElement.play();
-      } catch (e) {
-        console.log(e);
-      }
-      requestAnimationFrame(this.updateProgress);
-    }
-  }
-
-  togglePause() {
-    if (this.audioElement.paused) {
-      this.audioElement.play();
-      requestAnimationFrame(this.updateProgress);
-      this.setState({ paused: false });
-    } else {
-      this.audioElement.pause();
-      this.setState({ paused: true });
-    }
-  }
-
-  logScale(amount: number) {
-    return (Math.pow(1.03, amount) - 1) * (100 / (Math.pow(1.03, 100) - 1));
-  }
-
-  updateVolume(e: React.ChangeEvent<HTMLInputElement>) {
+  const updateVolume = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value;
-    this.audioElement.volume = this.logScale(parseInt(input)) / 100;
-    this.setState({ volume: input });
-  }
+    audioElement.volume = logScale(parseInt(input)) / 100;
+  }, []);
 
-  render(): React.ReactNode {
-    return (
-      <div className="player">
-        <div className="progressbar">
-          <div style={{ flex: "0 0 128px" }}>
-            {formatTime(this.state.progress)}
-          </div>
-          <div ref={this.capacityRef} className="capacity">
-            <div
-              className="progress"
-              style={{
-                width:
-                  (this.state.progress / this.state.duration) *
-                  this.state.length,
-              }}
-            />
-          </div>
-          <div style={{ flex: "0 0 128px", textAlign: "right" }}>
-            {formatTime(this.state.duration)}
-          </div>
-        </div>
-        <div className="controls">
-          <div className="play" onClick={this.togglePause}>
-            {this.audioElement.paused ? (
-              <Play className="hover" height={25} />
-            ) : (
-              <Pause className="hover" height={25} />
-            )}
-          </div>
-          <input
-            type="range"
-            onChange={this.updateVolume}
-            min={0}
-            max={100}
-            value={this.state.volume}
+  const togglePause = useCallback(() => {
+    if (audioElement.paused) {
+      audioElement.play();
+      requestAnimationFrame(updateProgress);
+      setPaused(false);
+    } else {
+      audioElement.pause();
+      setPaused(true);
+    }
+  }, []);
+
+  // on mount, update recorded length based on length of element
+  useEffect(() => {
+    const capacityLength = getComputedStyle(capacityRef.current)?.width;
+    setLength(parseInt(capacityLength));
+  }, []);
+
+  // on change url, play it
+  useEffect(() => {
+    audioElement.pause();
+    audioElement.currentTime = 0;
+    audioElement.src = props.src;
+    try {
+      audioElement.play();
+    } catch (e) {
+      console.log(e);
+    }
+    requestAnimationFrame(updateProgress);
+  }, [props.src]);
+
+  return (
+    <div className="player">
+      <div className="progressbar">
+        <div style={{ flex: "0 0 128px" }}>{formatTime(progress)}</div>
+        <div ref={capacityRef} className="capacity">
+          <div
+            className="progress"
+            style={{
+              width: (progress / duration) * length,
+            }}
           />
         </div>
+        <div style={{ flex: "0 0 128px", textAlign: "right" }}>
+          {formatTime(duration)}
+        </div>
       </div>
-    );
-  }
+      <div className="controls">
+        <div className="play" onClick={togglePause}>
+          {paused ? (
+            <Play className="hover" height={25} />
+          ) : (
+            <Pause className="hover" height={25} />
+          )}
+        </div>
+        <input type="range" onChange={updateVolume} min={0} max={100} />
+      </div>
+    </div>
+  );
 }
 
 export default Player;

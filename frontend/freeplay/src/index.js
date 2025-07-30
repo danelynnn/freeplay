@@ -1,10 +1,15 @@
+import "./index.css";
+
 import React from "react";
 import ReactDOM from "react-dom/client";
-import "./index.css";
-import App from "./App";
-import reportWebVitals from "./reportWebVitals";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import reportWebVitals from "./reportWebVitals";
+
+import App from "./App";
 import Detail from "Detail/Detail";
+import Login from "Login/Login";
+import Body from "Body/Body";
+import Register from "Register/Register";
 
 const router = createBrowserRouter([
   {
@@ -12,9 +17,17 @@ const router = createBrowserRouter([
     element: <App />,
     children: [
       {
-        path: "/:playlistId",
-        element: <Detail />,
+        path: "home",
+        element: <Body />,
+        children: [
+          {
+            path: ":playlistId",
+            element: <Detail />,
+          },
+        ],
       },
+      { path: "login", element: <Login /> },
+      { path: "register", element: <Register /> },
     ],
   },
 ]);

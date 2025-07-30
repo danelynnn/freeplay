@@ -3,11 +3,27 @@
   src: local("Ideal"), url("../fonts/Ideal.woff") format("woff");
 }
 
-$base-color: #27324d;
-$highlight: #303a51;
-$darker-color: #0f1728;
-$secondary-color: #ecb600;
-$tertiary-color: #6e1a10;
+$base-color: #1d2d44;
+$highlight: #748cab;
+$lighter-color: #3e5c76;
+$darker-color: #0d1321;
+$text-color: #f0ebd8;
+$secondary-color: #f0ebd8;
+$tertiary-color: #c5c0ae;
+
+* {
+  font-family: Ideal;
+}
+
+h1 {
+  margin-bottom: 0px;
+}
+p {
+  margin-bottom: 0px;
+}
+a {
+  color: $secondary-color;
+}
 
 .App {
   display: flex;
@@ -16,7 +32,7 @@ $tertiary-color: #6e1a10;
   font-family: Ideal, sans-serif;
   text-align: left;
   height: 100vh;
-  color: white;
+  color: $secondary-color;
 }
 
 .App-header {
@@ -25,23 +41,37 @@ $tertiary-color: #6e1a10;
   min-height: 50px;
   align-items: center;
   justify-content: space-between;
-  font-size: calc(10px + 2vmin);
+  // border: 1px solid white;
 
-  padding: 20px 0px 20px 0px;
+  // * {
+  //   margin: 10px;
+  // }
 }
 
 .App-main {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: row;
-
   padding-top: 20px;
-  height: 0px;
+  display: flex;
+  flex-grow: 1;
+  flex-direction: row;
+  height: 0;
+  justify-content: center;
 }
 
 .App-logo {
   height: 40vmin;
   pointer-events: none;
+}
+
+.header-button {
+  background-color: $darker-color;
+  padding: 10px;
+  cursor: default;
+  align-self: flex-start;
+  font-size: 20px;
+
+  &:hover {
+    background-color: $highlight;
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {

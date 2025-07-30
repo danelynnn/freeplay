@@ -1,9 +1,14 @@
 from flask import Flask, request
 from flask_restx import Resource, Api, reqparse
 from flask_cors import CORS, cross_origin
-import bcrypt
+
 from pymongo import MongoClient
+
 from yt_dlp import YoutubeDL
+
+import bcrypt
+import jwt
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -12,7 +17,10 @@ api = Api(app)
 ydl_opts = {"get-url": True, "format": "m4a/bestaudio/best"}
 ydl = YoutubeDL(ydl_opts)
 
-client = MongoClient("localhost", 27017)
+client = MongoClient(
+    "mongodb+srv://danelynnn:D4G7rdZTmvAdxE6z@freeplay.x99zxts.mongodb.net/?retryWrites=true&w=majority&appName=freeplay",
+    27017,
+)
 db = client.freeplay
 
 song_parser = reqparse.RequestParser()
@@ -35,21 +43,24 @@ class Song(Resource):
             return {"success": False, "response": str(e)}
 
 
-user_parser = reqparse.RequestParser()
-user_parser.add_argument(
+auth_parser = reqparse.RequestParser()
+auth_parser.add_argument(
     "username", type=str, required=True, help="you already know what it is"
 )
-user_parser.add_argument(
+auth_parser.add_argument(
+    "email", type=str, required=False, help="you already know what it is"
+)
+auth_parser.add_argument(
     "password", type=str, required=False, help="you already know what it is"
 )
 
 
-@api.route("/users/")
-@api.expect(user_parser)
+@api.route("/auth")
+@api.expect(auth_parser)
 class Auth(Resource):
     # log user in
     def get(self):
-        args = user_parser.parse_args()
+        args = auth_parser.parse_args()
         user = args.get("username")
         pw = args.get("password")
 
@@ -59,7 +70,21 @@ class Auth(Resource):
             check = bcrypt.checkpw(pw.encode("utf-8"), query.get("pass"))
 
             if check:
-                return {"success": True, "response": f"user {user} has been logged in!"}
+                iat = datetime.now()
+                exp = iat + timedelta(weeks=3)
+
+                header = {"alg": "HS256", "typ": "JWT"}
+                payload = {
+                    "sub": str(query.get("_id")),
+                    "user": user,
+                    "iat": iat.timestamp(),
+                    "exp": exp.timestamp(),
+                }
+                secret = "uwu"
+                access = jwt.encode(
+                    payload=payload, key=secret, algorithm="HS256", headers=header
+                )
+                return {"success": True, "response": access, "expiry": exp.timestamp()}
             else:
                 return {"success": False, "response": "password is incorrect"}
         else:
@@ -67,51 +92,120 @@ class Auth(Resource):
 
     # register user
     def post(self):
-        args = user_parser.parse_args()
+        args = auth_parser.parse_args()
 
         user = args.get("username")
+        email = args.get("email")
         pw = args.get("password")
 
         users_collection = db.users
-        query = users_collection.find_one({"user": user})
+        query = users_collection.find_one({"$or": [{"user": user}, {"email": email}]})
         if query:
             return {"success": False, "response": "user already exists"}
 
         pw_hash = bcrypt.hashpw(pw.encode("utf-8"), bcrypt.gensalt(12))
-        users_collection.insert_one({"user": user, "pass": pw_hash, "playlists": {}})
+        users_collection.insert_one({"user": user, "email": email, "pass": pw_hash})
 
         return {"success": True, "response": f"user {user} has been created!"}
 
 
-@api.route("/users/playlists/<string:playlist_id>")
+user_parser = reqparse.RequestParser()
+user_parser.add_argument(
+    "jwt_auth", type=str, required=True, help="you already know what it is"
+)
+
+
+@api.route("/user")
 @api.expect(user_parser)
-class Playlists(Resource):
-    def get(self, playlist_id):
+class User(Resource):
+    def get(self):
         args = user_parser.parse_args()
+        jwt_auth = args.get("jwt_auth")
+
+        secret = "uwu"
+        payload = jwt.decode(jwt_auth, key=secret, algorithms="HS256")
+        users_collection = db.users
+        query = users_collection.find_one({"user": payload["user"]})
+
+        if query:
+            return {
+                "success": True,
+                "response": {"user": query["user"], "email": query["email"]},
+            }
+        else:
+            return {"success": False, "response": "user not found somehow wtf"}
+
+
+playthroughsList_parser = reqparse.RequestParser()
+playthroughsList_parser.add_argument(
+    "auth_token", type=str, required=True, help="you already know what it is"
+)
+playthroughsList_parser.add_argument(
+    "playlistId", type=str, required=False, help="filter by specific playlist id"
+)
+playthroughsList_parser.add_argument(
+    "playthrough_data", type=dict, required=False, help="playthrough details"
+)
+
+
+@api.route("/playthroughs")
+@api.expect(playthroughsList_parser)
+class PlaythroughsList(Resource):
+    def get(self):
+        args = playthroughsList_parser.parse_args()
         user = args.get("username")
 
-        users_collection = db.users
-        query = users_collection.find_one({"user": user})
+        playthroughs_collection = db.playthroughs
+        query = playthroughs_collection.find({"user": user})
         if query:
-            playlists = query.get("playlists")
-            return {"success": True, "response": playlists.get(playlist_id, [])}
+            if args.get("playlistId"):
+                query = query.find({"playlistId": args.get("playlistId")})
+            return {"success": True, "response": query}
         else:
             return {"success": False, "response": "user does not exist"}
 
-    def post(self, playlist_id):
-        args = user_parser.parse_args()
+    def post(self):
+        args = playthroughs_parser.parse_args()
         user = args.get("username")
-        data = request.json
 
-        users_collection = db.users
-        query = users_collection.find_one({"user": user})
+        playthroughs_collection = db.playthroughs
+        playthrough = playthroughs_collection.insert_one(
+            {"user": user, **(args.get("playthrough_data"))}
+        )
+
+        return {"success": True, "response": playthrough.inserted_id}
+
+
+playthroughs_parser = reqparse.RequestParser()
+playthroughs_parser.add_argument(
+    "playthrough_data", type=dict, required=False, help="playthrough details"
+)
+
+
+@api.route("/playthroughs/<string:playthrough_id>")
+@api.expect(playthroughs_parser)
+class Playthroughs(Resource):
+    def get(self):
+        args = playthroughs_parser.parse_args()
+        playthrough_id = args.playthrough_id
+
+        playthroughs_collection = db.playthroughs
+        query = playthroughs_collection.find({"playthrough_id": playthrough_id})
         if query:
-            playlists = query.get("playlists")
-            playlists[playlist_id] = data[playlist_id]
+            return {"success": True, "response": query}
+        else:
+            return {"success": False, "response": "playthrough does not exist"}
 
-            users_collection.update_one(
-                {"user": user}, {"$set": {"playlists": playlists}}
-            )
+    def post(self):
+        args = playthroughs_parser.parse_args()
+        playthrough_id = args.playthrough_id
+
+        playthroughs_collection = db.playthroughs
+        playthroughs_collection.update_one(
+            {"playthrough_id": playthrough_id}, {"$set": args.get("playthrough_data")}
+        )
+
+        {"success": True, "response": playthrough_id}
 
 
 if __name__ == "__main__":

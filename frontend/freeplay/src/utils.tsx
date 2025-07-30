@@ -51,4 +51,22 @@ function shuffle(list: any[], mode: string) {
   }
 }
 
-export { objToQueryString, fetchp, formatTime, shuffle };
+function addCookie(data: { key: string; value: string; exp: number }) {
+  const key = data.key;
+  const value = data.value;
+  const exp = new Date(data.exp).toUTCString();
+
+  document.cookie = `${key}=${value}`;
+}
+
+function getCookie(key: string) {
+  // courtesy of https://stackoverflow.com/a/11767598
+  // Get name followed by anything except a semicolon
+  var cookiestring = RegExp(key + "=[^;]+").exec(document.cookie);
+  // Return everything after the equal sign, or an empty string if the cookie name not found
+  return decodeURIComponent(
+    !!cookiestring ? cookiestring.toString().replace(/^[^=]+./, "") : ""
+  );
+}
+
+export { objToQueryString, fetchp, formatTime, shuffle, addCookie, getCookie };

@@ -1,7 +1,6 @@
 import "./Player.scss";
 
-import { useCallback, useEffect, useState } from "react";
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 import { formatTime } from "utils";
 import { ReactComponent as Play } from "img/play.svg";

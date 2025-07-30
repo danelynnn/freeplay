@@ -1,4 +1,5 @@
 import "./ContextMenu.scss";
+
 import { ReactComponent as Shovel } from "img/shovel.svg";
 
 function ContextMenu(props: { data: any; onClick: any }) {

@@ -1,15 +1,29 @@
 import "./App.scss";
-import { useState } from "react";
-import { Outlet } from "react-router-dom";
-import { objToQueryString } from "utils";
+
+import {
+  useContext,
+  useState,
+  createContext,
+  useCallback,
+  useEffect,
+} from "react";
+import { Outlet, useNavigate } from "react-router-dom";
+
+import { getCookie, objToQueryString } from "utils";
 import Master from "Master/Master";
+import Body from "Body/Body";
+import Detail from "Detail/Detail";
+
+import AuthContext from "AuthContext";
 
 function App() {
   const [url, setUrl] = useState("ZPqZyIKtW0Y");
+  const navigate = useNavigate();
+  const [authContext, setAuthContext] = useState("");
 
-  function onUrlChange(e: React.ChangeEvent<HTMLInputElement>) {
+  const onUrlChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setUrl(e.target.value);
-  }
+  }, []);
 
   function loadFile() {
     const params = { video_id: url };
@@ -20,10 +34,16 @@ function App() {
       });
   }
 
+  useEffect(() => {
+    const cookie = getCookie("auth");
+    setAuthContext(cookie);
+  }, []);
+
   return (
     <div className="App">
-      <header className="App-header">
-        {/* <img src={logo} className="App-logo" alt="logo" />
+      <AuthContext.Provider value={{ authContext, setAuthContext }}>
+        <header className="App-header">
+          {/* <img src={logo} className="App-logo" alt="logo" />
         <p>
           Edit <code>src/App.js</code> and save to reload.
         </p>
@@ -36,15 +56,27 @@ function App() {
           Learn React
         </a> */}
 
-        <input type="text" placeholder="put url here" onChange={onUrlChange} />
-        <button onClick={loadFile}>hi do the thing</button>
-
-        {url}
-      </header>
-      <div className="App-main">
-        <Master />
-        <Outlet />
-      </div>
+          <input
+            style={{ margin: "10px" }}
+            type="text"
+            placeholder="put url here"
+            onChange={onUrlChange}
+          />
+          <button style={{ margin: "10px" }} onClick={loadFile}>
+            hi do the thing
+          </button>
+          {authContext ? (
+            <div style={{ maxWidth: 100 }}>{authContext}</div>
+          ) : (
+            <div className="header-button" onClick={() => navigate("/login")}>
+              Login
+            </div>
+          )}
+        </header>
+        <div className="App-main">
+          <Outlet />
+        </div>
+      </AuthContext.Provider>
     </div>
   );
 }

@@ -6,3 +6,4 @@ bcrypt==4.3.0
 pymongo==4.13.2
 yt-dlp==2025.7.21
 aiotube==1.7.2
+pyjwt==2.10.1

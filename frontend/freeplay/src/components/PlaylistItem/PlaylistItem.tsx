@@ -1,5 +1,6 @@
-import React from "react";
 import "./PlaylistItem.scss";
+
+import React from "react";
 
 function PlaylistItem(props: { data: any; onClick: React.MouseEventHandler }) {
   return (

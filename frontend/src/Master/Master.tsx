@@ -4,9 +4,8 @@ import { useCallback, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import PlaylistItem from "components/PlaylistItem/PlaylistItem";
-import { objToQueryString } from "utils";
-
 import AuthContext from "AuthContext";
+import { objToQueryString } from "utils";
 
 const channelId = "UChZJRASiSGfBba91VvkdbEA";
 

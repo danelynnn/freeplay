@@ -1,12 +1,14 @@
 import "./Detail.scss";
 
-import { useCallback, useEffect, useState } from "react";
+import { use, useCallback, useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import Player from "components/Player/Player";
 import ContextMenu from "components/PlaylistItem/ContextMenu/ContextMenu";
 import SongItem from "components/SongItem/SongItem";
 import { fetchp, objToQueryString, shuffle } from "utils";
+import PlaythroughContext from "PlaythroughContext";
+import AuthContext from "AuthContext";
 
 async function loadSong(url: string) {
   const request = await fetch(
@@ -21,18 +23,24 @@ async function loadSong(url: string) {
 }
 
 function Detail() {
+  const { authContext, setAuthContext } = useContext(AuthContext);
+  const { ptContext, setPtContext } = useContext(PlaythroughContext);
+
   const { playlistId } = useParams<{ playlistId: any }>();
+  const [playlist, setPlaylist] = useState<string[]>([]);
+  const [seed, setSeed] = useState(-1);
   const [songList, setSongList] = useState({ songs: [""], nowPlaying: -1 });
   const [currentSongInfo, setCurrentSongInfo] = useState({
     url: "",
     title: "",
     author: "",
   });
+  const [ptData, setPtData] = useState<any>(null);
 
-  const loadPlaylist = useCallback((playlistId: string) => {
-    console.log(`playlistId changed: ${playlistId}`);
-
+  // on playlistId change
+  useEffect(() => {
     if (playlistId) {
+      console.log(`playlistId changed: ${playlistId}`);
       fetchp(
         `https://www.googleapis.com/youtube/v3/playlistItems?${objToQueryString(
           {
@@ -43,11 +51,8 @@ function Detail() {
           }
         )}`
       ).then((data) => {
-        console.log(data);
         const songs = data.map((v) => v.contentDetails.videoId);
-        shuffle(songs, "");
-
-        setSongList({ songs: songs, nowPlaying: 0 });
+        setPlaylist(songs);
       });
 
       // fetch(
@@ -63,19 +68,46 @@ function Detail() {
       //     setSongList({ songs: songs, nowPlaying: 0 });
       //   });
     }
-  }, []);
-
-  // on playlistId change
-  useEffect(() => {
-    loadPlaylist(playlistId);
   }, [playlistId]);
+
+  // when playthrough context is loaded, load pt data
+  useEffect(() => {
+    if (ptContext)
+      fetch(
+        `http://127.0.0.1:5000/playthroughs/${ptContext}?${objToQueryString({
+          jwt_auth: authContext,
+        })}`
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          if (!ptData) setPtData(data.response);
+        });
+  }, ptContext);
+
+  // if song list has updated or playthrough has been loaded
+  useEffect(() => {
+    if (playlist) {
+      const songs = playlist;
+      if (ptData) {
+        console.log("playthrough found, running", ptData);
+        shuffle(songs, "", ptData.seed);
+        setSongList({ songs: songs, nowPlaying: ptData.progress });
+      } else {
+        const seed = Date.now();
+        console.log(`random shuffle, using seed ${seed}`);
+        shuffle(songs, "", seed);
+        setSeed(seed);
+        setSongList({ songs: songs, nowPlaying: 0 });
+      }
+    }
+  }, [playlist]);
 
   // on song change
   useEffect(() => {
     const newSong = songList.songs[songList.nowPlaying];
-    console.log("songs changed:", songList);
 
     if (newSong) {
+      console.log("songs changed:", newSong);
       fetch(
         `https://www.googleapis.com/youtube/v3/videos?${objToQueryString({
           part: "snippet",
@@ -119,8 +151,50 @@ function Detail() {
       //       });
       //     }
       //   });
+
+      // upload playlist progress
+      if (ptContext) {
+        const newPtData = { ...ptData, progress: songList.nowPlaying };
+        console.log("sending", newPtData);
+        fetch(
+          `http://127.0.0.1:5000/playthroughs/${ptContext}?${objToQueryString({
+            jwt_auth: authContext,
+          })}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(newPtData),
+          }
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data);
+          });
+      }
     }
   }, [songList]);
+
+  function savePlaythrough() {
+    let ptData = {
+      playlistId: playlistId,
+      seed: seed,
+      progress: songList.nowPlaying,
+    };
+    fetch(
+      `http://127.0.0.1:5000/playthroughs?${objToQueryString({
+        jwt_auth: authContext,
+      })}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(ptData),
+      }
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        setPtContext(data.response);
+      });
+  }
 
   return (
     <div style={{ flex: 2 }} className="detail">
@@ -140,7 +214,10 @@ function Detail() {
             <p>{currentSongInfo.author}</p>
           </div>
         )}
-        <ContextMenu data={null} onClick={null} />
+
+        {!ptContext && (
+          <button onClick={savePlaythrough}>Keep this playthrough</button>
+        )}
       </div>
       <div style={{ flex: 1, overflowY: "scroll" }} className="playlistQueue">
         {songList.songs.map((s, i) => (

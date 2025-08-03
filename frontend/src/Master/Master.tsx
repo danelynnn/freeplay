@@ -6,9 +6,11 @@ import { useNavigate } from "react-router-dom";
 import PlaylistItem from "components/PlaylistItem/PlaylistItem";
 import AuthContext from "AuthContext";
 import { objToQueryString } from "utils";
+import PlaythroughContext from "PlaythroughContext";
 
 function Master() {
   const { authContext, setAuthContext } = useContext(AuthContext);
+  const { ptContext, setPtContext } = useContext(PlaythroughContext);
   const navigate = useNavigate();
 
   const [playlists, setPlaylists] = useState([]);
@@ -76,9 +78,26 @@ function Master() {
     //   });
   }, [userData.connections?.yt_url]);
 
-  const handleSelect = useCallback((e: any) => {
-    navigate(e);
-  }, []);
+  function handleSelect(playlistId: string) {
+    fetch(
+      `http://127.0.0.1:5000/playthroughs?${objToQueryString({
+        jwt_auth: authContext,
+        playlistId: playlistId,
+      })}`
+    )
+      .then((response) => response.json())
+      .then((json) => {
+        if (json.response.length) {
+          console.log("routing to playlist with pt", json.response[0]);
+          setPtContext(json.response[0]._id);
+          navigate(playlistId);
+        } else {
+          console.log("routing to playlist");
+          setPtContext(null);
+          navigate(playlistId);
+        }
+      });
+  }
 
   return (
     <div style={{ flex: 1 }} className="master">

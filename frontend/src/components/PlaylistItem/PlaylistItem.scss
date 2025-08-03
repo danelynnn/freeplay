@@ -3,7 +3,9 @@
 .playlistItem {
   display: flex;
 
-  &:nth-child(even) {
+  background-color: $base-color;
+
+  &:nth-child(odd) {
     background-color: $darker-color;
   }
 

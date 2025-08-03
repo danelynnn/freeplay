@@ -9,13 +9,9 @@ import {
 } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 
-import { getCookie, objToQueryString } from "utils";
-import Master from "Master/Master";
-import Body from "Body/Body";
-import Detail from "Detail/Detail";
-
 import AuthContext from "AuthContext";
 import Avatar from "components/Avatar/Avatar";
+import { getCookie, objToQueryString } from "utils";
 
 function App() {
   const [url, setUrl] = useState("ZPqZyIKtW0Y");
@@ -27,8 +23,9 @@ function App() {
   }, []);
 
   function loadFile() {
-    const params = { video_id: url };
-    fetch(`http://127.0.0.1:5000/load_song?${objToQueryString(params)}`)
+    fetch(
+      `http://127.0.0.1:5000/load_song?${objToQueryString({ video_id: url })}`
+    )
       .then((response) => response.json())
       .then((json) => {
         console.log(json);

@@ -3,6 +3,7 @@ from flask_restx import Resource, Api, reqparse
 from flask_cors import CORS, cross_origin
 
 from pymongo import MongoClient
+from bson.objectid import ObjectId
 
 from yt_dlp import YoutubeDL
 
@@ -132,13 +133,11 @@ class User(Resource):
     def get(self):
         args = user_parser.parse_args()
         jwt_auth = args.get("jwt_auth")
-
         secret = "uwu"
         payload = jwt.decode(jwt_auth, key=secret, algorithms="HS256")
+
         users_collection = db.users
         query = users_collection.find_one({"user": payload["user"]})
-
-        print(dict(query))
 
         if query:
             return {
@@ -151,10 +150,10 @@ class User(Resource):
     def post(self):
         args = user_parser.parse_args()
         jwt_auth = args.get("jwt_auth")
-        user_data = request.json
-
         secret = "uwu"
         payload = jwt.decode(jwt_auth, key=secret, algorithms="HS256")
+
+        user_data = request.json
         users_collection = db.users
         query = users_collection.update_one(
             {"user": payload["user"]}, {"$set": user_data}
@@ -171,7 +170,7 @@ class User(Resource):
 
 playthroughsList_parser = reqparse.RequestParser()
 playthroughsList_parser.add_argument(
-    "auth_token", type=str, required=True, help="you already know what it is"
+    "jwt_auth", type=str, required=True, help="you already know what it is"
 )
 playthroughsList_parser.add_argument(
     "playlistId", type=str, required=False, help="filter by specific playlist id"
@@ -186,27 +185,43 @@ playthroughsList_parser.add_argument(
 class PlaythroughsList(Resource):
     def get(self):
         args = playthroughsList_parser.parse_args()
-        user = args.get("username")
+        jwt_auth = args.get("jwt_auth")
+        secret = "uwu"
+        payload = jwt.decode(jwt_auth, key=secret, algorithms="HS256")
 
         playthroughs_collection = db.playthroughs
-        query = playthroughs_collection.find({"user": user})
+        if args.get("playlistId"):
+            query = list(
+                playthroughs_collection.find(
+                    {"user": payload["user"], "playlistId": args.get("playlistId")}
+                )
+            )
+        else:
+            query = list(playthroughs_collection.find({"user": payload["user"]}))
+
+        for obj in query:
+            obj["_id"] = str(obj["_id"])
+
+        print(query)
+
         if query:
-            if args.get("playlistId"):
-                query = query.find({"playlistId": args.get("playlistId")})
             return {"success": True, "response": query}
         else:
             return {"success": False, "response": "user does not exist"}
 
     def post(self):
-        args = playthroughs_parser.parse_args()
-        user = args.get("username")
+        args = playthroughsList_parser.parse_args()
+        jwt_auth = args.get("jwt_auth")
+        secret = "uwu"
+        payload = jwt.decode(jwt_auth, key=secret, algorithms="HS256")
+        playthrough_data = request.json
 
         playthroughs_collection = db.playthroughs
         playthrough = playthroughs_collection.insert_one(
-            {"user": user, **(args.get("playthrough_data"))}
+            {"user": payload["user"], **playthrough_data}
         )
 
-        return {"success": True, "response": playthrough.inserted_id}
+        return {"success": True, "response": str(playthrough.inserted_id)}
 
 
 playthroughs_parser = reqparse.RequestParser()
@@ -218,27 +233,29 @@ playthroughs_parser.add_argument(
 @api.route("/playthroughs/<string:playthrough_id>")
 @api.expect(playthroughs_parser)
 class Playthroughs(Resource):
-    def get(self):
+    def get(self, playthrough_id):
         args = playthroughs_parser.parse_args()
-        playthrough_id = args.playthrough_id
 
         playthroughs_collection = db.playthroughs
-        query = playthroughs_collection.find({"playthrough_id": playthrough_id})
+        query = playthroughs_collection.find_one({"_id": ObjectId(playthrough_id)})
         if query:
-            return {"success": True, "response": query}
+            return {
+                "success": True,
+                "response": {k: query[k] for k in query if k != "_id"},
+            }
         else:
             return {"success": False, "response": "playthrough does not exist"}
 
-    def post(self):
+    def post(self, playthrough_id):
         args = playthroughs_parser.parse_args()
-        playthrough_id = args.playthrough_id
+        playthrough_data = request.json
 
         playthroughs_collection = db.playthroughs
-        playthroughs_collection.update_one(
-            {"playthrough_id": playthrough_id}, {"$set": args.get("playthrough_data")}
+        update = playthroughs_collection.update_one(
+            {"_id": ObjectId(playthrough_id)}, {"$set": playthrough_data}
         )
 
-        {"success": True, "response": playthrough_id}
+        return {"success": True, "response": update.modified_count}
 
 
 if __name__ == "__main__":

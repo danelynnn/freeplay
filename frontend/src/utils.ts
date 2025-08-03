@@ -1,3 +1,5 @@
+import Rand, { PRNG } from 'rand-seed';
+
 function objToQueryString(obj: object) {
   let params = new URLSearchParams();
 
@@ -38,12 +40,18 @@ function formatTime(seconds: number) {
     .padStart(4, "0")}`;
 }
 
-function shuffle(list: any[], mode: string) {
+function shuffle(list: any[], mode: string, seed: number = -1) {
+  let rand;
+  if (seed) {
+    rand = new Rand(seed.toString())
+  } else {
+    rand = new Rand();
+  }
   switch (mode) {
     default: // THE KNUTH SHUFFL: https://stackoverflow.com/a/2450976/6794873
       let i = list.length;
       while (i > 0) {
-        let randomIndex = Math.floor(Math.random() * i);
+        let randomIndex = Math.floor(rand.next() * i);
         i--;
 
         [list[i], list[randomIndex]] = [list[randomIndex], list[i]];

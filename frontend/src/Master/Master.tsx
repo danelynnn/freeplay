@@ -7,13 +7,15 @@ import PlaylistItem from "components/PlaylistItem/PlaylistItem";
 import AuthContext from "AuthContext";
 import { objToQueryString } from "utils";
 
-const channelId = "UChZJRASiSGfBba91VvkdbEA";
-
 function Master() {
-  const [playlists, setPlaylists] = useState([]);
-  const [currentUser, setCurrentUser] = useState({ user: null });
-  const navigate = useNavigate();
   const { authContext, setAuthContext } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const [playlists, setPlaylists] = useState([]);
+  const [userData, setUserData] = useState({
+    user: null,
+    connections: { yt_url: null },
+  });
 
   useEffect(() => {
     if (authContext)
@@ -24,34 +26,36 @@ function Master() {
       )
         .then((response) => response.json())
         .then((data) => {
-          setCurrentUser(data.response);
+          setUserData(data.response);
         });
   }, [authContext]);
 
   useEffect(() => {
-    console.log(`loading playlists for ${channelId}`);
+    if (userData.connections?.yt_url) {
+      console.log(`loading playlists for ${userData.connections?.yt_url}`);
 
-    fetch(
-      `https://www.googleapis.com/youtube/v3/playlists?${objToQueryString({
-        part: "contentDetails,snippet",
-        channelId: channelId,
-        maxResults: 50,
-        key: "AIzaSyAMCp_2vGgaVHlvM4f_544qwDOxIctjmKg",
-      })}`
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        const playlists = data.items;
-        setPlaylists(
-          playlists.map((p: { id: any; snippet: any }) => {
-            return {
-              id: p.id,
-              thumbnail: p.snippet.thumbnails.default.url,
-              name: p.snippet.title,
-            };
-          })
-        );
-      });
+      fetch(
+        `https://www.googleapis.com/youtube/v3/playlists?${objToQueryString({
+          part: "contentDetails,snippet",
+          channelId: userData.connections?.yt_url,
+          maxResults: 50,
+          key: "AIzaSyAMCp_2vGgaVHlvM4f_544qwDOxIctjmKg",
+        })}`
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          const playlists = data.items;
+          setPlaylists(
+            playlists.map((p: { id: any; snippet: any }) => {
+              return {
+                id: p.id,
+                thumbnail: p.snippet.thumbnails.default.url,
+                name: p.snippet.title,
+              };
+            })
+          );
+        });
+    }
     // fetch(
     //   `http://127.0.0.1:5001/playlists?${objToQueryString({
     //     channelId: channelId,
@@ -70,7 +74,7 @@ function Master() {
     //       })
     //     );
     //   });
-  }, []);
+  }, [userData.connections?.yt_url]);
 
   const handleSelect = useCallback((e: any) => {
     navigate(e);
@@ -78,16 +82,32 @@ function Master() {
 
   return (
     <div style={{ flex: 1 }} className="master">
-      you are {currentUser.user}
-      <h1>your youtube lists</h1>
-      <div className="striped">
-        {playlists.map((p: any) => (
-          <PlaylistItem
-            key={p.id}
-            data={p}
-            onClick={() => handleSelect(p.id)}
-          />
-        ))}
+      <h1>welcome, {userData.user}!</h1>
+      <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
+        <div>
+          <h2>your youtube lists</h2>
+          <div style={{ paddingTop: 20 }} className="striped">
+            {playlists.map((p: any) => (
+              <PlaylistItem
+                key={p.id}
+                data={p}
+                onClick={() => handleSelect(p.id)}
+              />
+            ))}
+          </div>
+        </div>
+        <div>
+          <h2>your personal lists</h2>
+          <div style={{ paddingTop: 20 }} className="striped">
+            {playlists.map((p: any) => (
+              <PlaylistItem
+                key={p.id}
+                data={p}
+                onClick={() => handleSelect(p.id)}
+              />
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

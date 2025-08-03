@@ -15,6 +15,7 @@ import Body from "Body/Body";
 import Detail from "Detail/Detail";
 
 import AuthContext from "AuthContext";
+import Avatar from "components/Avatar/Avatar";
 
 function App() {
   const [url, setUrl] = useState("ZPqZyIKtW0Y");
@@ -66,7 +67,7 @@ function App() {
             hi do the thing
           </button>
           {authContext ? (
-            <div style={{ maxWidth: 100 }}>{authContext}</div>
+            <Avatar auth={authContext} />
           ) : (
             <div className="header-button" onClick={() => navigate("/login")}>
               Login

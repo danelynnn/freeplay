@@ -142,22 +142,20 @@ function Detail() {
         )}
         <ContextMenu data={null} onClick={null} />
       </div>
-      <div style={{ flex: 1, overflowY: "scroll" }}>
-        <div>
-          {songList.songs.map((s, i) => (
-            <SongItem
-              key={s}
-              data={s}
-              onClick={() => {
-                setSongList({
-                  ...songList,
-                  nowPlaying: i,
-                });
-              }}
-              selected={i === songList.nowPlaying}
-            />
-          ))}
-        </div>
+      <div style={{ flex: 1, overflowY: "scroll" }} className="playlistQueue">
+        {songList.songs.map((s, i) => (
+          <SongItem
+            key={s}
+            data={s}
+            onClick={() => {
+              setSongList({
+                ...songList,
+                nowPlaying: i,
+              });
+            }}
+            selected={i === songList.nowPlaying}
+          />
+        ))}
       </div>
     </div>
   );

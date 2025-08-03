@@ -8,6 +8,7 @@ import Detail from "Detail/Detail";
 import Login from "Login/Login";
 import Body from "Body/Body";
 import Register from "Register/Register";
+import Profile from "Profile/Profile";
 
 const router = createBrowserRouter([
   {
@@ -26,6 +27,7 @@ const router = createBrowserRouter([
       },
       { path: "login", element: <Login /> },
       { path: "register", element: <Register /> },
+      { path: "profile", element: <Profile /> },
     ],
   },
 ]);

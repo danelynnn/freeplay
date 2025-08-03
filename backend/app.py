@@ -104,7 +104,15 @@ class Auth(Resource):
             return {"success": False, "response": "user already exists"}
 
         pw_hash = bcrypt.hashpw(pw.encode("utf-8"), bcrypt.gensalt(12))
-        users_collection.insert_one({"user": user, "email": email, "pass": pw_hash})
+        users_collection.insert_one(
+            {
+                "user": user,
+                "pass": pw_hash,
+                "email": email,
+                "pfp": "https://i.ytimg.com/img/no_thumbnail.jpg",
+                "connections": {"yt_url": None},
+            }
+        )
 
         return {"success": True, "response": f"user {user} has been created!"}
 
@@ -112,6 +120,9 @@ class Auth(Resource):
 user_parser = reqparse.RequestParser()
 user_parser.add_argument(
     "jwt_auth", type=str, required=True, help="you already know what it is"
+)
+user_parser.add_argument(
+    "user_data", type=dict, required=False, help="you already know what it is"
 )
 
 
@@ -127,10 +138,32 @@ class User(Resource):
         users_collection = db.users
         query = users_collection.find_one({"user": payload["user"]})
 
+        print(dict(query))
+
         if query:
             return {
                 "success": True,
-                "response": {"user": query["user"], "email": query["email"]},
+                "response": {k: query[k] for k in query if k not in ["_id", "pass"]},
+            }
+        else:
+            return {"success": False, "response": "user not found somehow wtf"}
+
+    def post(self):
+        args = user_parser.parse_args()
+        jwt_auth = args.get("jwt_auth")
+        user_data = request.json
+
+        secret = "uwu"
+        payload = jwt.decode(jwt_auth, key=secret, algorithms="HS256")
+        users_collection = db.users
+        query = users_collection.update_one(
+            {"user": payload["user"]}, {"$set": user_data}
+        )
+
+        if query:
+            return {
+                "success": True,
+                "response": f"{query.modified_count} results modified",
             }
         else:
             return {"success": False, "response": "user not found somehow wtf"}

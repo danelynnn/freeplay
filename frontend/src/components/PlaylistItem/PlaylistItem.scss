@@ -2,7 +2,6 @@
 
 .playlistItem {
   display: flex;
-  gap: 20px;
 
   &:nth-child(even) {
     background-color: $darker-color;

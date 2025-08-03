@@ -15,7 +15,10 @@ $tertiary-color: #c5c0ae;
   font-family: Ideal;
 }
 
-h1 {
+h1,
+h2,
+h3,
+h4 {
   margin-bottom: 0px;
 }
 p {
@@ -36,6 +39,7 @@ a {
 }
 
 .App-header {
+  background-color: $darker-color;
   display: flex;
   flex-direction: row;
   min-height: 50px;
@@ -49,7 +53,7 @@ a {
 }
 
 .App-main {
-  padding-top: 20px;
+  margin-top: 20px;
   display: flex;
   flex-grow: 1;
   flex-direction: row;

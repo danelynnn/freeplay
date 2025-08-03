@@ -6,3 +6,11 @@
   overflow-y: scroll;
   height: 100%;
 }
+
+.striped {
+  background-color: $darker-color;
+
+  .playlistItem:nth-child(odd) {
+    background-color: $base-color; /* White background for odd rows (default) */
+  }
+}

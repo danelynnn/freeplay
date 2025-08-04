@@ -6,7 +6,7 @@ import { Link } from "react-router";
 import { objToQueryString } from "utils";
 
 function Avatar(props: { auth: string }) {
-  const [userData, setUserData] = useState({
+  const [userData, setUserData] = useState<any | null>({
     user: "",
     email: "",
     pfp: "",
@@ -33,21 +33,23 @@ function Avatar(props: { auth: string }) {
   }
 
   return (
-    <div>
-      <div className="appBarItem" onClick={profileClick}>
-        <div
-          className="avatar"
-          style={{ backgroundImage: `url(${userData.pfp})` }}
-        />
+    userData && (
+      <div>
+        <div className="appBarItem" onClick={profileClick}>
+          <div
+            className="avatar"
+            style={{ backgroundImage: `url(${userData.pfp})` }}
+          />
+        </div>
+        <div className="panel" hidden={!showPane}>
+          <h2>{userData.user}</h2>
+          <p>{userData.email}</p>
+          <p>
+            <Link to="/profile">Profile</Link>
+          </p>
+        </div>
       </div>
-      <div className="panel" hidden={!showPane}>
-        <h2>{userData.user}</h2>
-        <p>{userData.email}</p>
-        <p>
-          <Link to="/profile">Profile</Link>
-        </p>
-      </div>
-    </div>
+    )
   );
 
   return <p>hi</p>;

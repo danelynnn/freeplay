@@ -38,9 +38,12 @@ function Detail() {
   const [ptData, setPtData] = useState<any>(null);
 
   // on playlistId change
+  // load playlist and load ptData for that playlist
   useEffect(() => {
     if (playlistId) {
-      console.log(`playlistId changed: ${playlistId}`);
+      console.log(`loading playlist: ${playlistId}`);
+      setPlaylist([]);
+      setPtData(null);
       setSongList({ songs: [""], nowPlaying: -1 });
       fetchp(
         `https://www.googleapis.com/youtube/v3/playlistItems?${objToQueryString(
@@ -53,7 +56,7 @@ function Detail() {
         )}`
       ).then((data) => {
         const songs = data.map((v) => v.contentDetails.videoId);
-        console.log("playlist loaded");
+        console.log("playlist found", songs);
         setPlaylist(songs);
       });
 
@@ -69,12 +72,7 @@ function Detail() {
 
       //     setSongList({ songs: songs, nowPlaying: 0 });
       //   });
-    }
-  }, [playlistId]);
 
-  // when playlist is loaded, load pt data for that playlist
-  useEffect(() => {
-    if (playlist.length) {
       console.log(`loading pt data for ${ptContext}`);
       if (ptContext) {
         fetch(
@@ -92,11 +90,11 @@ function Detail() {
         setPtData({});
       }
     }
-  }, [playlist]);
+  }, [playlistId]);
 
-  // when ptData is loaded for this playlist, load my songs
+  // when playlist and ptData is loaded for this playlist, load my songs
   useEffect(() => {
-    if (ptData) {
+    if (playlist.length && ptData) {
       console.log("loading song list");
 
       const songs = playlist;
@@ -111,14 +109,15 @@ function Detail() {
         setSongList({ songs: songs, nowPlaying: 0 });
       }
     }
-  }, [ptData]);
+  }, [playlist, ptData]);
 
   // on song change
   useEffect(() => {
     const newSong = songList.songs[songList.nowPlaying];
 
     if (newSong) {
-      console.log("song changed:", newSong);
+      console.log("loading song:", newSong);
+
       fetch(
         `https://www.googleapis.com/youtube/v3/videos?${objToQueryString({
           part: "snippet",

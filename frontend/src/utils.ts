@@ -32,6 +32,7 @@ function formatTime(seconds: number) {
   seconds = Math.floor(seconds);
   var hours = Math.floor(seconds / 3600);
   var minutes = Math.floor((seconds - hours * 3600) / 60);
+  seconds = Math.floor(seconds % 60);
 
   return `${hours.toString().padStart(2, "0")}:${minutes
     .toString()

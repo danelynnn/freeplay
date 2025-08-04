@@ -193,7 +193,12 @@ class PlaythroughsList(Resource):
         if args.get("playlistId"):
             query = list(
                 playthroughs_collection.find(
-                    {"user": payload["user"], "playlistId": args.get("playlistId")}
+                    {
+                        "$and": [
+                            {"user": payload["user"]},
+                            {"playlistId": args.get("playlistId")},
+                        ]
+                    }
                 )
             )
         else:

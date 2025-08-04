@@ -41,6 +41,7 @@ function Detail() {
   useEffect(() => {
     if (playlistId) {
       console.log(`playlistId changed: ${playlistId}`);
+      setSongList({ songs: [""], nowPlaying: -1 });
       fetchp(
         `https://www.googleapis.com/youtube/v3/playlistItems?${objToQueryString(
           {
@@ -52,6 +53,7 @@ function Detail() {
         )}`
       ).then((data) => {
         const songs = data.map((v) => v.contentDetails.videoId);
+        console.log("playlist loaded");
         setPlaylist(songs);
       });
 
@@ -70,26 +72,35 @@ function Detail() {
     }
   }, [playlistId]);
 
-  // when playthrough context is loaded, load pt data
+  // when playlist is loaded, load pt data for that playlist
   useEffect(() => {
-    if (ptContext)
-      fetch(
-        `http://127.0.0.1:5000/playthroughs/${ptContext}?${objToQueryString({
-          jwt_auth: authContext,
-        })}`
-      )
-        .then((response) => response.json())
-        .then((data) => {
-          if (!ptData) setPtData(data.response);
-        });
-  }, ptContext);
+    if (playlist.length) {
+      console.log(`loading pt data for ${ptContext}`);
+      if (ptContext) {
+        fetch(
+          `http://127.0.0.1:5000/playthroughs/${ptContext}?${objToQueryString({
+            jwt_auth: authContext,
+          })}`
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            setPtData(data.response);
 
-  // if song list has updated or playthrough has been loaded
+            console.log("playthrough found, running", data.response);
+          });
+      } else {
+        setPtData({});
+      }
+    }
+  }, [playlist]);
+
+  // when ptData is loaded for this playlist, load my songs
   useEffect(() => {
-    if (playlist) {
+    if (ptData) {
+      console.log("loading song list");
+
       const songs = playlist;
-      if (ptData) {
-        console.log("playthrough found, running", ptData);
+      if (Object.keys(ptData).length) {
         shuffle(songs, "", ptData.seed);
         setSongList({ songs: songs, nowPlaying: ptData.progress });
       } else {
@@ -100,14 +111,14 @@ function Detail() {
         setSongList({ songs: songs, nowPlaying: 0 });
       }
     }
-  }, [playlist]);
+  }, [ptData]);
 
   // on song change
   useEffect(() => {
     const newSong = songList.songs[songList.nowPlaying];
 
     if (newSong) {
-      console.log("songs changed:", newSong);
+      console.log("song changed:", newSong);
       fetch(
         `https://www.googleapis.com/youtube/v3/videos?${objToQueryString({
           part: "snippet",
@@ -168,7 +179,7 @@ function Detail() {
         )
           .then((response) => response.json())
           .then((data) => {
-            console.log(data);
+            // console.log(data);
           });
       }
     }
